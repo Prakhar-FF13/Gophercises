@@ -26,7 +26,7 @@ func main() {
 	*/
 	ior, err := os.Open("./problems.csv")
 	if err != nil {
-		log.Fatal("Problem opening problems csv\n")
+		log.Fatal("Problem opening problems csv\n", err)
 	}
 	defer ior.Close()
 
