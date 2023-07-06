@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,9 +13,9 @@ type StoryOptions struct {
 	Arc  string `json:"arc"`
 }
 type Story struct {
-	Title   string         `json:"title"`
-	Story   []string       `json:"story"`
-	Options []StoryOptions `json:"options"`
+	Title     string         `json:"title"`
+	Paragraph []string       `json:"story"`
+	Options   []StoryOptions `json:"options"`
 }
 
 func loadStoriesFile() map[string]Story {
@@ -33,17 +32,45 @@ func loadStoriesFile() map[string]Story {
 }
 
 func main() {
-	loadStoriesFile()
+	// load stories
+	stories := loadStoriesFile()
 
+	// create a mux.
 	mux := http.NewServeMux()
 
+	// handler function which matches url path and displays correct stories.
 	storiesHandler := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r)
-		io.WriteString(w, "Hello")
+
+		url := r.URL
+		var path string
+
+		// our home page is /intro
+		if len(url.Path) <= 1 {
+			io.WriteString(w, "home page is /intro")
+			return
+		}
+
+		// basic path processing. removing / from start and end.
+		if url.Path[len(url.Path)-1] == '/' {
+			path = url.Path[1 : len(url.Path)-1]
+		} else {
+			path = url.Path[1:len(url.Path)]
+		}
+
+		// get correct story
+		s, prs := stories[path]
+
+		// send the correct title to user.
+		if prs {
+			io.WriteString(w, s.Title)
+		} else {
+			// wrong story requested.
+			io.WriteString(w, "Cannot find a story at this url")
+		}
 	}
 
 	mux.HandleFunc("/", storiesHandler)
 
-	// log.Fatal(http.ListenAndServe(":4000", mux))
+	log.Fatal(http.ListenAndServe(":4000", mux))
 
 }
