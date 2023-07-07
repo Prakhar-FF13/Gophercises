@@ -1,0 +1,24 @@
+{{define "base"}}
+<html>
+  <head>
+    <title>Gophercises Choose your own adventure</title>
+  </head>
+  <body>
+    <h2>{{.Title}}</h2>
+    {{range .Paragraph}}
+    <p>{{.}}</p>
+    {{end}}
+    <hr />
+    <ul>
+      {{range .Options}}
+      <a href="/{{.Arc}}">
+        <li>{{.Text}}</li>
+      </a>
+      {{else}}
+      <h2>END</h2>
+      <p>Go to start <a href="/intro">Intro</a></p>
+      {{end}}
+    </ul>
+  </body>
+</html>
+{{end}}

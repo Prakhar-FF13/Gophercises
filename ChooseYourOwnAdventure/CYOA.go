@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -38,6 +39,12 @@ func main() {
 	// create a mux.
 	mux := http.NewServeMux()
 
+	file, err := os.ReadFile("./story.tmpl.html")
+
+	if err != nil {
+		log.Fatal("Could not open html template file ", err)
+	}
+
 	// handler function which matches url path and displays correct stories.
 	storiesHandler := func(w http.ResponseWriter, r *http.Request) {
 
@@ -62,7 +69,11 @@ func main() {
 
 		// send the correct title to user.
 		if prs {
-			io.WriteString(w, s.Title)
+			t, err := template.New("base").Parse(string(file))
+			if err != nil {
+				log.Fatal("Error parsing the template file", err)
+			}
+			t.ExecuteTemplate(w, "base", s)
 		} else {
 			// wrong story requested.
 			io.WriteString(w, "Cannot find a story at this url")
